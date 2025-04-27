@@ -7,16 +7,14 @@ las consultas siguientes se hacen a traves de Dbeaver.
 ## Estructora del repositorio ##
 
 ```bash 
-|___Data
-|    |___hotel_bookings.csv #original data  
-|    |___hotel_bookings_processed_data #cleaned data
 |
 |___BBDD_SQL_proyecto2
 |    |___BBDD_Proyecto #archivo BBDD SQL
-|    |___Diagram_Proyecto_BBDD #imagen .png del diagrama 
+|    |___Diagram_Proyecto_BBDD #imagen.png del diagrama 
+|    |___EnunciadoDataProject_SQL.Lógica #lista de consultas a realizar
 |    |___README
 |   
-|____README
+
 
 ```
 
@@ -112,33 +110,162 @@ SELECT max(length ) AS mayor_duracion, min(length ) AS menor_duracion
 FROM film ;
 ```
 
-  Encuentra lo que costó el antepenúltimo alquiler ordenado por día.
-  Encuentra el título de las películas en la tabla “filmˮ que no sean ni ‘NC
- 17ʼ ni ‘Gʼ en cuanto a su clasificación.
-  Encuentra el promedio de duración de las películas para cada 
+ **11. Encuentra lo que costó el antepenúltimo alquiler ordenado por día**  
+
+```
+SELECT amount  
+FROM payment 
+ORDER BY payment_date DESC 
+LIMIT 1 OFFSET 1;
+```
+
+
+**12. Encuentra el título de las películas en la tabla “filmˮ que no sean ni ‘NC-
+ 17ʼ ni ‘Gʼ en cuanto a su clasificación**
+
+```
+SELECT title 
+FROM film   
+WHERE rating NOT IN('NC-17','G');
+```
+
+**13. Encuentra el promedio de duración de las películas para cada 
 clasificación de la tabla film y muestra la clasificación junto con el 
-promedio de duración.
-  Encuentra el título de todas las películas que tengan una duración mayor 
-a 180 minutos.
-  ¿Cuánto dinero ha generado en total la empresa?
- Muestra los 10 clientes con mayor valor de id.
-  Encuentra el nombre y apellido de los actores que aparecen en la 
-película con título ‘Egg Igbyʼ
- Selecciona todos los nombres de las películas únicos.
-  Encuentra el título de las películas que son comedias y tienen una 
-duración mayor a 180 minutos en la tabla “filmˮ.
-  Encuentra las categorías de películas que tienen un promedio de 
-duración superior a 110 minutos y muestra el nombre de la categoría 
-junto con el promedio de duración.
-  ¿Cuál es la media de duración del alquiler de las películas?
- Crea una columna con el nombre y apellidos de todos los actores y 
-actrices.
- Números de alquiler por día, ordenados por cantidad de alquiler de 
-forma descendente.
-  Encuentra las películas con una duración superior al promedio.
- Averigua el número de alquileres registrados por mes.
-  Encuentra el promedio, la desviación estándar y varianza del total 
-pagado.
+promedio de duración**
+
+``` 
+SELECT rating, 
+    AVG(length ) AS "promedio_duracion_peliculas"
+FROM film 
+GROUP BY rating ;
+```
+
+
+
+ **14. Encuentra el título de todas las películas que tengan una duración mayor 
+a 180 minutos**
+
+```
+SELECT title 
+FROM film 
+WHERE length >= '180';
+
+```   
+
+
+**15. ¿Cuánto dinero ha generado en total la empresa?**
+
+```
+SELECT SUM(amount ) AS "total_ingresos"
+FROM payment  ;
+
+```
+
+
+
+
+**16. Muestra los 10 clientes con mayor valor de id**
+
+``` 
+SELECT customer_id , first_name , last_name 
+FROM customer 
+ORDER BY customer_id DESC
+    LIMIT 10;
+
+```
+
+ **17. Encuentra el nombre y apellido de los actores que aparecen en la 
+película con título ‘Egg Igbyʼ**
+
+```
+SELECT first_name , last_name 
+FROM actor  AS a
+INNER JOIN film_actor  AS fa ON a.actor_id = fa.actor_id
+INNER JOIN film AS f ON fa.film_id = f.film_id 
+WHERE f.title ILIKE 'egg igby';
+
+```
+
+
+**18. Selecciona todos los nombres de las películas únicos** 
+
+```
+SELECT DISTINCT title 
+FROM film;
+```
+
+
+**19. Encuentra el título de las películas que son comedias y tienen una 
+duración mayor a 180 minutos en la tabla “filmˮ**
+
+```
+SELECT title 
+FROM film AS f 
+INNER JOIN film_category AS fc ON f.film_id = fc.film_id
+INNER JOIN category AS c ON c.category_id = fc.category_id
+WHERE f.length >= 180 AND c."name" ILIKE 'comedy';
+```  
+
+
+**20. Encuentra las categorías de películas que tienen un promedio de duración superior a 110 minutos y muestra el nombre de la categoría junto con el promedio de duración**  
+
+``` 
+SELECT c.name AS categoria, ROUND(AVG(f.length),2) AS promedio_duracion
+FROM film f
+JOIN film_category fc ON f.film_id = fc.film_id
+JOIN category c ON fc.category_id = c.category_id
+GROUP BY c.name
+HAVING ROUND(AVG(f.length ), 2) > 110;
+
+```
+
+**21. ¿Cuál es la media de duración del alquiler de las películas?**
+
+```
+
+SELECT AVG((return_date - rental_date)) AS duracion_media_alquiler
+FROM rental ;
+```
+
+
+
+**21. Crea una columna con el nombre y apellidos de todos los actores y 
+actrices**
+
+```
+SELECT concat(first_name , ' ', last_name )
+FROM actor 
+ORDER BY last_name ASC ;
+```
+
+
+**22. Números de alquiler por día, ordenados por cantidad de alquiler de 
+forma descendente**
+
+```
+SELECT CAST(rental_date AS DATE) AS fecha_alquiler, COUNT(rental_id) AS cantidad_alquiler_dia
+FROM rental 
+GROUP BY CAST(rental_date AS DATE)
+ORDER BY cantidad_alquiler_dia DESC;
+```
+
+ **23. Encuentra las películas con una duración superior al promedio**
+
+ ``` 
+ SELECT *
+FROM film 
+WHERE length > (SELECT AVG(length)
+                FROM film) ;
+```
+
+
+**24. Averigua el número de alquileres registrados por mes**
+
+
+**25. Encuentra el promedio, la desviación estándar y varianza del total 
+pagado**
+
+
   ¿Qué películas se alquilan por encima del precio medio?
  Muestra el id de los actores que hayan participado en más de 40 
 películas.
