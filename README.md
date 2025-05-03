@@ -13,7 +13,8 @@ las consultas siguientes se hacen a traves de Dbeaver.
 |    |___Diagram_Proyecto_BBDD #imagen.png del diagrama 
 |    |___EnunciadoDataProject_SQL.Lógica #lista de consultas a realizar
 |    |___README
-|   
+|    |___script-consultas_proyecto_2 #script SQL de respuestas   
+|
 
 
 ```
@@ -50,16 +51,18 @@ WHERE actor_id <= 40 AND actor_id >= 30;
 
 Todos los valores de la columna original_language_id son nulos por lo cual no se muestra ningun resultado.
 
-```SELECT title 
+```
+SELECT title 
 FROM film 
-WHERE language_id = original_language_id AND original_language_id IS NOT NULL ;`
+WHERE language_id = original_language_id 
+    AND original_language_id IS NOT NULL ;`
 ```
 
 
 **5. Ordena las películas por duración de forma ascendente**  
 ```
-SELECT  * 
-FROM film 
+SELECT  title , length 
+FROM    film
 ORDER BY length ASC ;
 ```
 
@@ -70,7 +73,7 @@ apellido**
 ```
 SELECT first_name , last_name 
 FROM actor 
-WHERE last_name ILIKE 'Allen'
+WHERE last_name ILIKE 'Allen';
 ```
 
 
@@ -82,17 +85,17 @@ WHERE last_name ILIKE 'Allen'
 ```
 SELECT rating, COUNT(*) AS total_peliculas
 FROM film
-GROUP BY rating
+GROUP BY rating;
 ```
 
  **8. Encuentra el título de todas las películas que son ‘PG-13ʼ o tienen una 
 duración mayor a 3 horas en la tabla film**
 
 ```
-SELECT *
-FROM film 
-WHERE rating = 'PG-13' OR length > 180
-;
+SELECT title, length, rating  
+FROM   film
+WHERE  rating = 'PG-13'
+    OR length > 180;
 ```
 
 
@@ -100,7 +103,7 @@ WHERE rating = 'PG-13' OR length > 180
 
 ```
 SELECT VAR_SAMP(replacement_cost)  AS variabilidad
-FROM film 
+FROM film ;
 ```
 
  **10. Encuentra la mayor y menor duración de una película de nuestra BBDD**
@@ -134,9 +137,8 @@ clasificación de la tabla film y muestra la clasificación junto con el
 promedio de duración**
 
 ``` 
-SELECT rating, 
-    AVG(length ) AS "promedio_duracion_peliculas"
-FROM film 
+SELECT  rating, round(AVG(length),0) AS "promedio_duracion_peliculas"
+FROM    film
 GROUP BY rating ;
 ```
 
@@ -146,9 +148,9 @@ GROUP BY rating ;
 a 180 minutos**
 
 ```
-SELECT title 
-FROM film 
-WHERE length >= '180';
+SELECT  title, length 
+FROM    film
+WHERE    length >= '180';
 
 ```   
 
@@ -157,7 +159,7 @@ WHERE length >= '180';
 
 ```
 SELECT SUM(amount ) AS "total_ingresos"
-FROM payment  ;
+FROM payment ;
 
 ```
 
@@ -222,24 +224,24 @@ HAVING ROUND(AVG(f.length ), 2) > 110;
 **21. ¿Cuál es la media de duración del alquiler de las películas?**
 
 ```
-
 SELECT AVG((return_date - rental_date)) AS duracion_media_alquiler
 FROM rental ;
 ```
 
 
 
-**21. Crea una columna con el nombre y apellidos de todos los actores y 
+**22. Crea una columna con el nombre y apellidos de todos los actores y 
 actrices**
 
 ```
 SELECT concat(first_name , ' ', last_name )
-FROM actor 
+FROM actor
+GROUP BY actor_id 
 ORDER BY last_name ASC ;
 ```
 
 
-**22. Números de alquiler por día, ordenados por cantidad de alquiler de 
+**23. Números de alquiler por día, ordenados por cantidad de alquiler de 
 forma descendente**
 
 ```
@@ -249,17 +251,17 @@ GROUP BY CAST(rental_date AS DATE)
 ORDER BY cantidad_alquiler_dia DESC;
 ```
 
- **23. Encuentra las películas con una duración superior al promedio**
+ **24. Encuentra las películas con una duración superior al promedio**
 
  ``` 
- SELECT *
-FROM film 
+SELECT title 
+FROM film
 WHERE length > (SELECT AVG(length)
-                FROM film) ;
+                FROM film);
 ```
 
 
-**24. Averigua el número de alquileres registrados por mes**
+**25. Averigua el número de alquileres registrados por mes**
 
 ```
 SELECT date_part('month', rental_date ) AS mes,
@@ -269,7 +271,7 @@ GROUP BY mes
 ORDER BY mes ;
 ```
 
-**25. Encuentra el promedio, la desviación estándar y varianza del total 
+**26. Encuentra el promedio, la desviación estándar y varianza del total 
 pagado**
 
 ```
@@ -279,12 +281,9 @@ SELECT AVG(amount ) AS promedio,
 FROM payment AS p ;
 
 ```
-**26  ¿Qué películas se alquilan por encima del precio medio?**
+**27  ¿Qué películas se alquilan por encima del precio medio?**
 
 ```
-SELECT AVG(rental_rate)
-FROM film AS f ;
-
 SELECT title AS titulo , rental_rate AS precio_alquiler ,
         (SELECT AVG(rental_rate)FROM film) AS promedio_precio_alquiler
 FROM film AS f 
@@ -293,17 +292,17 @@ WHERE rental_rate  >
         FROM film);
 ```
 
- **27. Muestra el id de los actores que hayan participado en más de 40 
+ **28. Muestra el id de los actores que hayan participado en más de 40 
 películas**
 
 ```
 SELECT actor_id, COUNT(film_id ) AS numero_peliculas
 FROM film_actor AS fa 
 GROUP BY actor_id  
-HAVING COUNT(film_id) > 40  ;
+HAVING COUNT(film_id) > 40 ;
 ```
 
-**28. Obtener todas las películas y, si están disponibles en el inventario, 
+**29. Obtener todas las películas y, si están disponibles en el inventario, 
 mostrar la cantidad disponible**
 
 ```
@@ -315,11 +314,10 @@ HAVING COUNT(f.film_id) > 0
 ORDER BY cantidad_disponible ASC
 ```
 
-**29. Obtener los actores y el número de películas en las que ha actuado**
+**30. Obtener los actores y el número de películas en las que ha actuado**
 
 ```
-SELECT  a.actor_id, 
-        CONCAT(a.first_name, ' ', a.last_name) AS Actor, 
+SELECT  CONCAT(a.first_name, ' ', a.last_name) AS Actor, 
         COUNT(fa.film_id) AS numero_peliculas
 FROM film_actor AS fa 
 JOIN actor AS a ON a.actor_id = fa.actor_id
@@ -328,7 +326,7 @@ ORDER BY numero_peliculas DESC ;
 ```
 
 
-**30. Obtener todas las películas y mostrar los actores que han actuado en 
+**31. Obtener todas las películas y mostrar los actores que han actuado en 
 ellas, incluso si algunas películas no tienen actores asociados**
 
 ```
@@ -339,7 +337,7 @@ LEFT JOIN actor AS a ON a.actor_id = fa.actor_id
 ORDER BY f.title;
 ```
 
-**31. Obtener todos los actores y mostrar las películas en las que han 
+**32. Obtener todos los actores y mostrar las películas en las que han 
 actuado, incluso si algunos actores no han actuado en ninguna película**
 
 ```
@@ -350,11 +348,11 @@ LEFT JOIN film AS f ON fa.film_id =f.film_id
 ORDER BY nombre_actor ASC ;
 ```
 
- **32. Obtener todas las películas que tenemos y todos los registros de 
+ **33. Obtener todas las películas que tenemos y todos los registros de 
 alquiler**
 
 ```
-SELECT f.title, r.rental_date
+SELECT f.title, i.inventory_id, r.rental_date
 FROM inventory AS i 
 FULL JOIN film AS f ON i.film_id = f.film_id 
 FULL JOIN rental AS r ON i.inventory_id = r.inventory_id
@@ -484,7 +482,6 @@ LEFT JOIN film_actor AS fa  ON fa.actor_id = a.actor_id
 WHERE fa.film_id IS NULL ;
 ```
 
-
 **47. Selecciona el nombre de los actores y la cantidad de películas en las 
 que han participado**
 
@@ -493,7 +490,7 @@ SELECT a.first_name, COUNT(film_id ) AS cantidad_peliculas
 FROM actor AS a 
 LEFT JOIN film_actor AS fa ON fa.actor_id = a.actor_id
 GROUP BY a.actor_id 
-ORDER BY first_name 
+ORDER BY first_name ;
 
 ```
 
@@ -537,14 +534,15 @@ almacenar el total de alquileres por cliente**
 ```
 CREATE TEMPORARY TABLE cliente_rentas_temporal (
     "cliente" INT,
-    "total_alquiler" INT)
-;
+    "total_alquiler" INT);
+
 INSERT INTO cliente_rentas_temporal (cliente, total_alquiler)
 SELECT r.customer_id, COUNT(r.rental_id)
 FROM rental AS r 
-GROUP BY r.customer_id
-;
+GROUP BY r.customer_id;
 
+SELECT *
+FROM cliente_rentas_temporal;
 ```
 
 
@@ -565,6 +563,9 @@ LEFT JOIN inventory AS i ON f.film_id = i.film_id
 LEFT JOIN rental AS r ON i.inventory_id = r.inventory_id 
 GROUP BY f.title
 HAVING COUNT(r.rental_id) >= 10;
+ 
+SELECT *
+FROM peliculas_alquiladas;
 ```
 
 **53.  Encuentra el título de las películas que han sido alquiladas por el cliente 
@@ -639,8 +640,7 @@ WHERE a.actor_id NOT IN (
     LEFT JOIN film_category AS fc ON fc.film_id = f.film_id
     LEFT JOIN category AS c ON c.category_id = fc.category_id
     WHERE c."name" ILIKE 'music'
-    )
-;
+    );
 
 ```
 
@@ -652,8 +652,7 @@ SELECT f.title, (r.return_date::date - r.rental_date:: date ) AS rental_duration
 FROM film AS f
 LEFT JOIN inventory AS i ON i.film_id = f.film_id 
 LEFT JOIN rental AS r ON r.inventory_id = i.inventory_id
-WHERE (r.return_date::date - r.rental_date:: date ) > 8 
-;
+WHERE (r.return_date::date - r.rental_date:: date ) > 8 ;
 ```
 
  **58. Encuentra el título de todas las películas que son de la misma categoría 
@@ -664,9 +663,9 @@ SELECT f.title
 FROM film AS f 
 LEFT JOIN film_category AS fc ON fc.film_id = f.film_id
 LEFT JOIN category AS c ON c.category_id = fc.category_id
-WHERE c."name" ILIKE 'animation'
-;
+WHERE c."name" = 'Animation';
 ```
+
  **59. Encuentra los nombres de las películas que tienen la misma duración 
 que la película con el título ‘Dancing Feverʼ. Ordena los resultados 
 alfabéticamente por título de película** 
@@ -677,15 +676,15 @@ WHERE f.length = (
     SELECT f.length 
     FROM film AS f 
     WHERE f.title ILIKE 'dancing fever')
-ORDER BY f.title
-;
+ORDER BY f.title;
 ```
  
  
  **60. Encuentra los nombres de los clientes que han alquilado al menos 7 
 películas distintas. Ordena los resultados alfabéticamente por apellido**
 ```
-SELECT concat(c.first_name, ' ', c.last_name) AS nombre_cliente
+SELECT concat(c.first_name, ' ', c.last_name) AS nombre_cliente, 
+    count(DISTINCT r.inventory_id) AS cantidad_alquiler
 FROM customer AS c 
 LEFT JOIN rental AS r ON r.customer_id = c.customer_id
 LEFT JOIN inventory AS i ON i.inventory_id = r.inventory_id 
@@ -697,6 +696,8 @@ ORDER BY c.last_name;
 
  **61. Encuentra la cantidad total de películas alquiladas por categoría y 
 muestra el nombre de la categoría junto con el recuento de alquileres**
+
+se entiende que se trata de las peliculas actualmente alquiladas. si no fuera el caso entonces se quitaria la funcion "WHERE r.return_date IS NULL"
 ```
 SELECT c."name" AS categoria, count(r.rental_id) AS cantidad_alquilada
 FROM category AS c 
@@ -704,6 +705,7 @@ LEFT JOIN film_category AS fc ON fc.category_id = c.category_id
 LEFT JOIN film AS f ON f.film_id = fc.film_id
 LEFT JOIN inventory AS i ON i.film_id = f.film_id
 LEFT JOIN rental AS r ON r.inventory_id = i.inventory_id
+WHERE r.return_date IS NULL 
 GROUP BY c."name"
 ORDER BY c."name";
 ```
